@@ -1,6 +1,7 @@
 # WireGuard VPN Setup
 
 Credit && Source: https://barrowclift.me/articles/wireguard-server-on-macos
+
 Personal WireGuard VPN configuration for macOS with dual-stack (IPv4/IPv6) support, NAT, and DNS leak protection.
 
 ## Features
