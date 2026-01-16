@@ -11,12 +11,14 @@ Personal WireGuard VPN configuration for macOS with dual-stack (IPv4/IPv6) suppo
 - Network Address Translation (NAT) for multiple clients
 - DNS leak prevention (Cloudflare DNS)
 - Automatic firewall configuration via pf
+- Dynamic network interface detection (no hardcoded interface names)
+- Connection logging to `/var/log/wireguard.log`
+- Health check command for monitoring
 
 ## Requirements
 
-- macOS
+- macOS server with direct internet connection (public IP) or configure router port forwarding for UDP 51820
 - WireGuard tools: `brew install wireguard-tools wireguard-go`
-- Router with port forwarding (port 51820)
 
 ## Setup
 
@@ -34,22 +36,45 @@ Personal WireGuard VPN configuration for macOS with dual-stack (IPv4/IPv6) suppo
    chmod +x /opt/homebrew/etc/wireguard/{postup,postdown}.sh
    ```
 
-4. Configure router port forwarding for UDP port 51820
+4. Install health check command:
+   ```bash
+   sudo cp wg-healthcheck.sh /opt/homebrew/bin/wg-healthcheck
+   sudo chmod +x /opt/homebrew/bin/wg-healthcheck
+   ```
+
+5. Configure router port forwarding for UDP port 51820 (if behind NAT/router)
 
 ## Usage
 
 Start VPN:
 ```bash
-wg-quick up coordinates.conf
+sudo wg-quick up coordinates.conf
 ```
 
 Stop VPN:
 ```bash
-wg-quick down coordinates.conf
+sudo wg-quick down coordinates.conf
+```
+
+Check WireGuard status:
+```bash
+sudo wg show
+```
+
+Check connection health:
+```bash
+sudo wg-healthcheck
+```
+Output: `{"status":"up","interface":"utun9","peers":2,"handshake":"2025-01-16 12:34:56"}`
+
+View logs:
+```bash
+tail -f /var/log/wireguard.log
 ```
 
 ## Files
 
 - `coordinates.conf` - WireGuard configuration
-- `postup.sh` - Startup script (enables IP forwarding, configures NAT)
+- `postup.sh` - Startup script (enables IP forwarding, configures NAT with dynamic interface detection)
 - `postdown.sh` - Shutdown script (cleans up firewall rules)
+- `wg-healthcheck.sh` - Health check script (JSON output for monitoring)
